@@ -100,3 +100,43 @@ vmod_exists(struct sess *sp, const char *path)
 	(void)sp;
 	return (stat(path, &st) == 0);
 }
+
+const char*
+vmod_split_random(const char* str, const char* delim) {
+    char *s = strdup(str);
+
+    size_t tokens_alloc = 1;
+    size_t tokens_used = 0;
+    char **tokens = calloc(tokens_alloc, sizeof(char*));
+    char *token;
+    int i;
+
+    char *token, *strtok_ctx;
+    for (token = strtok_r(s, delim, &strtok_ctx);
+            token != NULL;
+            token = strtok_r(NULL, delim, &strtok_ctx)) {
+        // check if we need to allocate more space for tokens
+        if (tokens_used == tokens_alloc) {
+            tokens_alloc *= 2;
+            tokens = realloc(tokens, tokens_alloc * sizeof(char*));
+        }
+        tokens[tokens_used++] = strdup(token);
+    }
+
+    // cleanup
+    if (tokens_used == 0) {
+        free(tokens);
+        tokens = NULL;
+        // return original string
+        return s;
+    } else {
+    	// select a random string from the list
+    	i = rand() % tokens_used;
+        token = strdup(tokens[i]);
+    }
+    
+    free(tokens);
+    free(s);
+
+    return token;
+}
